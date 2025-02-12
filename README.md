@@ -25,9 +25,15 @@ This repository contains the seasonal forecast balance for the Ter River reservo
 - When updated data becomes available, the observed evolution of the current season will be added.
 
 ## Repository Structure
-- **/plot/**: Contains forecast results.
-- **/data/**: Input datasets used for the models.
-- **/code/**: Scripts used for processing and analysis.
+- **/plot/**: Contains results.
+- **/in/**: Input datasets used for the models.
+- **/out/**: Outputs from the codes
 
-This first version of the balance provides reasonable estimates and aligns with last year’s observations. Let me know your thoughts!
+## Codes
+- **1_calculated_balance.R**
+- **2_river.R**
+- **3_forecast_balance_sau.R**
+- **3_forecast_balance_sqd.R**
+
+This first version of the balance provides reasonable estimates and aligns with last year’s observations.
 
