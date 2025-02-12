@@ -114,7 +114,6 @@ for (i in 2:51){
 }
 #ensemble mean
 lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
-
 #real dynamic previous year
 dates_plot <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
 sel_pos <- sau_balance$date %in% dates_plot
@@ -124,8 +123,28 @@ lines(as.Date(inflow_for_sau$date),sau_balance$V[sel_pos][1:length(inflow_for_sa
 legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
        col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
 dev.off()
-#save results forecast
 
+png("plot/3_forecast_sau.png", width = 800, height = 600, units = "px")
+#plot corrected volumes
+plot(as.Date(inflow_for_sau$date), V_total_sau[,1], type="l", 
+     ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date")
+for (i in 2:51){
+  lines(as.Date(inflow_for_sau$date), V_total_sau[,i])
+}
+#ensemble mean
+lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+#real dynamic previous year
+dates_plot <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
+sel_pos <- sau_balance$date %in% dates_plot
+#plot(sau_balance$date[sel_pos],sau_balance$V[sel_pos], type="l")
+lines(as.Date(inflow_for_sau$date),sau_balance$V[sel_pos][1:length(inflow_for_sau$date)], 
+      col="blue", lwd=3)
+legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
+       col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
+dev.off()
+
+
+#save results forecast
 write.csv(data.frame(date=inflow_for_sau$date, change_Q_sau), 
           file="out/forecast_sau/for_change_Q_sau.csv", 
           quote = F,row.names = F)

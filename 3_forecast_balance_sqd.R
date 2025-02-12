@@ -114,17 +114,35 @@ for (i in 2:51){
 }
 #ensemble mean
 lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
-
 #real dynamic previous year
 dates_plot <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
 sel_pos <- sqd_balance$date %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
-
 lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
       col="blue", lwd=3)
 legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
        col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
 dev.off()
+
+png("plot/3_forecast_sqd.png", width = 800, height = 600, units = "px")
+#plot corrected volumes
+plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
+     ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+for (i in 2:51){
+  lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+}
+#ensemble mean
+lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+#real dynamic previous year
+dates_plot <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
+sel_pos <- sqd_balance$date %in% dates_plot
+#plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
+lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
+      col="blue", lwd=3)
+legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
+       col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
+dev.off()
+
 #save results forecast
 write.csv(change_Q_sqd, file="out/forecast_sqd/for_change_Q_sqd.csv")
 write.csv(change_V_sqd, file="out/forecast_sqd/for_change_V_sqd.csv")

@@ -93,3 +93,10 @@ for (i in 2:51){
   lines(discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
 }
 dev.off()
+
+png("plot/2_inflow_sau_ensemble.png", width = 800, height = 600, units = "px")
+plot(discharge_data[1,], type="l", ylim=c(0,700), col="blue")
+for (i in 2:51){
+  lines(discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
+}
+dev.off()

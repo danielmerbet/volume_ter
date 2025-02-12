@@ -43,6 +43,14 @@ legend("topright", legend=c("Qin", "Qout"), col=c("blue", "red"), lty=1, cex=0.8
 plot(data$date, data$V, type="l", ylab="Volume (m³)", xlab="Date")
 dev.off()
 
+png("plot/1_initial_volumes_sau.png", width = 800, height = 600, units = "px")
+op<- par(mfrow=c(2,1), mar=c(3,4,1,2)+.1)
+plot(data$date, data$Qin_calc, type="l", col="blue", ylab="Qin/Qout (m³/s)", xlab="Date")
+lines(data$date, data$Qout_calc, col="red")
+legend("topright", legend=c("Qin", "Qout"), col=c("blue", "red"), lty=1, cex=0.8, bty="n")
+plot(data$date, data$V, type="l", ylab="Volume (m³)", xlab="Date")
+dev.off()
+
 #SUSQUEDA
 #data since 2017
 #load original data: volume, inflows, outflows and gate extractions
@@ -82,4 +90,13 @@ lines(data$date, data$Qout_calc, col="red")
 legend("topright", legend=c("Qin", "Qout"), col=c("blue", "red"), lty=1, cex=0.8, bty="n")
 plot(data$date, data$V, type="l", ylab="Volume (m³)", xlab="Date")
 dev.off()
+
+png("plot/1_initial_volumes_sqd.png", width = 800, height = 600, units = "px")
+op<- par(mfrow=c(2,1), mar=c(3,4,1,2)+.1)
+plot(data$date, data$Qin_calc, type="l", col="blue", ylab="Qin/Qout (m³/s)", xlab="Date")
+lines(data$date, data$Qout_calc, col="red")
+legend("topright", legend=c("Qin", "Qout"), col=c("blue", "red"), lty=1, cex=0.8, bty="n")
+plot(data$date, data$V, type="l", ylab="Volume (m³)", xlab="Date")
+dev.off()
+
 
