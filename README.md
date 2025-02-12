@@ -30,10 +30,10 @@ This repository contains the seasonal forecast balance for the Ter River reservo
 - **/out/**: Outputs from the codes
 
 ## Codes
-- **1_calculated_balance.R**
-- **2_river.R**
-- **3_forecast_balance_sau.R**
-- **3_forecast_balance_sqd.R**
+- **1_calculated_balance.R**: calculate and fix the water balance from the original data.
+- **2_river.R**: implement hydrologic modelling forced by SEAS5 to obtain forecast ensemble of discharge of the Ter river going into Sau Reservoir.
+- **3_forecast_balance_sau.R**: calculate volumen ensemble forecasting for the next coming months for Sau Reservoir.
+- **3_forecast_balance_sqd.R**: calculate volumen ensemble forecasting for the next coming months for Susqueda Reservoir.
 
 This first version of the balance provides reasonable estimates and aligns with last year’s observations.
 
