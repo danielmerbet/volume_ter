@@ -13,10 +13,10 @@ This repository contains the seasonal forecast balance for the Ter River reservo
 ## Results
 
 ### SAU
-![SAU Forecast](.plot/3_forecast_sau.png)
+![SAU Forecast](./plot/3_forecast_sau.png)
 
 ### SQD (Susqueda)
-![SQD Forecast](.plot/3_forecast_sqd.png)
+![SQD Forecast](./plot/3_forecast_sqd.png)
 
 ## Interpretation of the Plots
 - **Black lines**: Different forecast members.
