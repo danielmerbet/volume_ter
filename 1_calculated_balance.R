@@ -6,7 +6,7 @@ library(lubridate); library(imputeTS)
 dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
 setwd(dir)
 
-data <- read.csv("~/Documents/intoDBP/water_balance_ter/in/water_balance_sau.csv")
+data <- read.csv("in/water_balance_sau.csv")
 data$date <- as.Date(data$date, format = "%m/%d/%Y")
 
 #checking data

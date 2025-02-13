@@ -6,8 +6,11 @@ date_ini <- as.Date("2024-10-01")
 #calculated balances
 sqd_balance <- read.csv("out/calculated_sqd.csv")
 
+#current balance for the actual dates
+sqd_balance_actual <- read.csv("in/water_balance_sqd_actual.csv")
+
 #median outflows of the last x days
-x_days <- 20
+x_days <- 10
 dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
 sqd_balance$date <- as.Date(sqd_balance$date)
 out_median_sqd <- median(sqd_balance[sqd_balance$date %in% dates_median_out,]$Qout)
@@ -40,7 +43,7 @@ for (m in 1:members){
   
 }
 
-plot(V_total_sqd[,1], type="l", ylim=c(0,100))
+plot(V_total_sqd[,1], type="l", ylim=c(-100,100))
 for (i in 2:51){
   lines(V_total_sqd[,i])
 }
@@ -84,6 +87,7 @@ for (m in 1:members){
     V_total_temp <- (V_total_temp+change_V_sqd[d,m])
     #assume Qin=Qout when volumen is lower than 5% or greater than 95%
     if (V_total_temp<(unique(sqd_balance$Vmax)*0.05)){
+      V_total_temp <- (V_total_temp-change_V_sqd[d,m])
       print(paste0("d: ", d, "m: ", m))
       Qout_sqd[d,m] <- inflow_for_sqd[d,(1+m)]
       print(paste0("Qin: ", inflow_for_sqd[d,(1+m)]))
@@ -91,13 +95,12 @@ for (m in 1:members){
       change_Q_sqd[d,m] <- inflow_for_sqd[d,(1+m)] - Qout_sqd[d,m] #should be 0
       print(change_Q_sqd[d,m])
       change_V_sqd[d,m] <- change_Q_sqd[d,m]*(86400/1e6)
-      V_total_temp <- (V_ini_sqd+change_V_sqd[1,m])
     }
     if (V_total_temp>(unique(sqd_balance$Vmax)*0.95)){
+      V_total_temp <- (V_total_temp-change_V_sqd[d,m])
       Qout_sqd[1,m] <- inflow_for_sqd[d,(1+m)]
       change_Q_sqd[1,m] <- inflow_for_sqd[d,(1+m)] - Qout_sqd[d,m] #should be 0
       change_V_sqd[1,m] <- change_Q_sqd[d,m]*(86400/1e6)
-      V_total_temp <- (V_ini_sqd+change_V_sqd[d,m])
     }
     V_total_temp_vector <- c(V_total_temp_vector, V_total_temp)
   }
@@ -120,8 +123,10 @@ sel_pos <- sqd_balance$date %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
       col="blue", lwd=3)
-legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
-       col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
+lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
+      col="green", lwd=3)
+legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+       col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
 png("plot/3_forecast_sqd.png", width = 800, height = 600, units = "px")
@@ -139,8 +144,10 @@ sel_pos <- sqd_balance$date %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
       col="blue", lwd=3)
-legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
-       col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
+lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
+      col="green", lwd=3)
+legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+       col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
 #save results forecast

@@ -6,8 +6,11 @@ date_ini <- as.Date("2024-10-01")
 #calculated balances
 sau_balance <- read.csv("out/calculated_sau.csv")
 
+#current balance for the actual dates
+sau_balance_actual <- read.csv("in/water_balance_sau_actual.csv")
+
 #median outflows of the last x days
-x_days <- 20
+x_days <- 5
 dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
 sau_balance$date <- as.Date(sau_balance$date)
 out_median_sau <- median(sau_balance[sau_balance$date %in% dates_median_out,]$Qout)
@@ -84,6 +87,7 @@ for (m in 1:members){
     V_total_temp <- (V_total_temp+change_V_sau[d,m])
     #assume Qin=Qout when volumen is lower than 5% or greater than 95%
     if (V_total_temp<(unique(sau_balance$Vmax)*0.05)){
+      V_total_temp <- (V_total_temp-change_V_sau[d,m])
       print(paste0("d: ", d, "m: ", m))
       Qout_sau[d,m] <- inflow_for_sau[d,(1+m)]
       print(paste0("Qin: ", inflow_for_sau[d,(1+m)]))
@@ -91,13 +95,15 @@ for (m in 1:members){
       change_Q_sau[d,m] <- inflow_for_sau[d,(1+m)] - Qout_sau[d,m] #should be 0
       print(change_Q_sau[d,m])
       change_V_sau[d,m] <- change_Q_sau[d,m]*(86400/1e6)
-      V_total_temp <- (V_ini_sau+change_V_sau[1,m])
+      #V_total_temp <- (V_ini_sau+change_V_sau[1,m])
     }
     if (V_total_temp>(unique(sau_balance$Vmax)*0.95)){
-      Qout_sau[1,m] <- inflow_for_sau[d,(1+m)]
-      change_Q_sau[1,m] <- inflow_for_sau[d,(1+m)] - Qout_sau[d,m] #should be 0
-      change_V_sau[1,m] <- change_Q_sau[d,m]*(86400/1e6)
-      V_total_temp <- (V_ini_sau+change_V_sau[d,m])
+      V_total_temp <- (V_total_temp-change_V_sau[d,m])
+      print(paste0("d: ", d, "m: ", m))
+      Qout_sau[d,m] <- inflow_for_sau[d,(1+m)]
+      change_Q_sau[d,m] <- inflow_for_sau[d,(1+m)] - Qout_sau[d,m] #should be 0
+      change_V_sau[d,m] <- change_Q_sau[d,m]*(86400/1e6)
+      #V_total_temp <- (V_ini_sau+change_V_sau[d,m])
     }
     V_total_temp_vector <- c(V_total_temp_vector, V_total_temp)
   }
@@ -120,8 +126,10 @@ sel_pos <- sau_balance$date %in% dates_plot
 #plot(sau_balance$date[sel_pos],sau_balance$V[sel_pos], type="l")
 lines(as.Date(inflow_for_sau$date),sau_balance$V[sel_pos][1:length(inflow_for_sau$date)], 
       col="blue", lwd=3)
-legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
-       col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
+lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),sau_balance_actual$V, 
+      col="green", lwd=3)
+legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+       col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
 png("plot/3_forecast_sau.png", width = 800, height = 600, units = "px")
@@ -139,8 +147,10 @@ sel_pos <- sau_balance$date %in% dates_plot
 #plot(sau_balance$date[sel_pos],sau_balance$V[sel_pos], type="l")
 lines(as.Date(inflow_for_sau$date),sau_balance$V[sel_pos][1:length(inflow_for_sau$date)], 
       col="blue", lwd=3)
-legend("topright", legend=c("Ensemble", "Last year", "51 members"), 
-       col=c("red","blue", "black"), lty=1, cex=0.8, bty="n")
+lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),sau_balance_actual$V, 
+      col="green", lwd=3)
+legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+       col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
 
