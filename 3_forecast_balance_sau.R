@@ -1,5 +1,8 @@
 library(lubridate); library(imputeTS)
 
+dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
+setwd(dir)
+
 #initialisation forecast
 date_ini <- as.Date("2024-10-01")
 
@@ -95,7 +98,6 @@ for (m in 1:members){
       change_Q_sau[d,m] <- inflow_for_sau[d,(1+m)] - Qout_sau[d,m] #should be 0
       print(change_Q_sau[d,m])
       change_V_sau[d,m] <- change_Q_sau[d,m]*(86400/1e6)
-      #V_total_temp <- (V_ini_sau+change_V_sau[1,m])
     }
     if (V_total_temp>(unique(sau_balance$Vmax)*0.95)){
       V_total_temp <- (V_total_temp-change_V_sau[d,m])
@@ -103,7 +105,6 @@ for (m in 1:members){
       Qout_sau[d,m] <- inflow_for_sau[d,(1+m)]
       change_Q_sau[d,m] <- inflow_for_sau[d,(1+m)] - Qout_sau[d,m] #should be 0
       change_V_sau[d,m] <- change_Q_sau[d,m]*(86400/1e6)
-      #V_total_temp <- (V_ini_sau+change_V_sau[d,m])
     }
     V_total_temp_vector <- c(V_total_temp_vector, V_total_temp)
   }
@@ -164,3 +165,8 @@ write.csv(data.frame(date=inflow_for_sau$date, change_V_sau),
 write.csv(data.frame(date=inflow_for_sau$date, Qout_sau),
           file="out/forecast_sau/for_Qout_sau.csv",
           quote = F,row.names = F)
+write.csv(data.frame(date=inflow_for_sau$date, V_total_sau),
+          file="out/forecast_sau/for_V_sau.csv",
+          quote = F,row.names = F)
+
+

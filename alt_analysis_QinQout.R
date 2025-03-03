@@ -8,10 +8,12 @@ dates_previous <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
 sel_pos <- sau_balance$date %in% dates_previous
 pseas <- sau_balance[sel_pos,]
 
+pdf("plot/3_Qin_Qout_past.pdf")
 op<- par(mfrow=c(2,1), mar=c(3,4,1,2)+.1)
 plot(pseas$date, pseas$V, type="l", col="black", lwd=3)
-plot(pseas$date, pseas$Qin_calc, col="blue", type="l")
+plot(pseas$date, pseas$Qin_calc, col="blue", type="l", ylim = c(0,25))
 lines(pseas$date, pseas$Qout_calc, col="red")
+dev.off()
 
 # Calculate the 5-day moving average (eman)
 pseas$Qout5 <- zoo::rollmean(pseas$Qout, k = 5, align = "right", fill = NA)

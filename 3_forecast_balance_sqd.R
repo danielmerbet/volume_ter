@@ -1,5 +1,8 @@
 library(lubridate); library(imputeTS)
 
+dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
+setwd(dir)
+
 #initialisation forecast
 date_ini <- as.Date("2024-10-01")
 
@@ -151,6 +154,15 @@ legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual seas
 dev.off()
 
 #save results forecast
-write.csv(change_Q_sqd, file="out/forecast_sqd/for_change_Q_sqd.csv")
-write.csv(change_V_sqd, file="out/forecast_sqd/for_change_V_sqd.csv")
-write.csv(Qout_sqd, file="out/forecast_sqd/for_Qout_sqd.csv")
+write.csv(data.frame(date=inflow_for_sqd$date,change_Q_sqd), 
+          file="out/forecast_sqd/for_change_Q_sqd.csv",
+          quote = F,row.names = F)
+write.csv(data.frame(date=inflow_for_sqd$date,change_V_sqd), 
+          file="out/forecast_sqd/for_change_V_sqd.csv",
+          quote = F,row.names = F)
+write.csv(data.frame(date=inflow_for_sqd$date,Qout_sqd), 
+          file="out/forecast_sqd/for_Qout_sqd.csv",
+          quote = F,row.names = F)
+write.csv(data.frame(date=inflow_for_sqd$date, V_total_sqd),
+          file="out/forecast_sqd/for_V_sqd.csv",
+          quote = F,row.names = F)
