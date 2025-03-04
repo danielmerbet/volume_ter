@@ -6,9 +6,9 @@ This repository contains the seasonal forecast balance for the Ter River reservo
 
 - The seasonal forecast is initialized on **October 1, 2024**.
 - The **inflow to Sau** is estimated using hydrological models, with SEAS5 meteorology as input.
-- The balance assumes that **outflows from both reservoirs** are equal to the median of the last x days (it could be changed in the code).
-- In **Sau**, sometimes the volume is negative (many members) or exceeds the maximum (a few members). To correct this, if the volume falls below 5% or exceeds 95%, inflows are assumed to be equal to outflows for that specific day.
-- In **Susqueda**, this issue does not occur, so no correction is necessary.
+- The balance can assume two outflows: (1) outflows from both reservoirs are equal to the median of the last x days, (2) the same outflor for a similar situation in the past. In this case the second options was selected and the previous season (October 2023 - May 2024) was used.
+- In **Sau**, sometimes the volume is negative (many members) or exceeds the maximum (a few members). To correct this, if the volume falls below min_vol or exceeds max_vol, inflows are assumed to be equal to outflows for that specific day.
+- In **Susqueda**, this issue does not occur frequently, but the same is applied when happens.
 
 ## Results
 
