@@ -3,8 +3,15 @@ library(lubridate); library(imputeTS)
 dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
 setwd(dir)
 
+#out_option <- 1 #1: median last x days
+out_option <- 2 #2: same as last similar season
+min_vol <- 0.00 #minimum volume in percentage
+max_vol <- 0.95
+
 #initialisation forecast
 date_ini <- as.Date("2024-10-01")
+date_ini_previous <- as.Date("2023-10-01")
+date_end_previous <- as.Date("2024-04-30")
 
 #calculated balances
 sau_balance <- read.csv("out/calculated_sau.csv")
@@ -12,15 +19,28 @@ sau_balance <- read.csv("out/calculated_sau.csv")
 #current balance for the actual dates
 sau_balance_actual <- read.csv("in/water_balance_sau_actual.csv")
 
-#median outflows of the last x days
-x_days <- 5
-dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
-sau_balance$date <- as.Date(sau_balance$date)
-out_median_sau <- median(sau_balance[sau_balance$date %in% dates_median_out,]$Qout)
-print(paste0("SAU median outflow of last ", x_days, ": ",round(out_median_sau,2)))
-
 #load forecast sau
 inflow_for_sau <- read.csv("out/inflow_for_sau.csv") 
+
+#median outflows of the last x days
+if (out_option==1){
+  x_days <- 5
+  dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
+  sau_balance$date <- as.Date(sau_balance$date)
+  out_median_sau <- median(sau_balance[sau_balance$date %in% dates_median_out,]$Qout)
+  print(paste0("SAU median outflow of last ", x_days, ": ",round(out_median_sau,2)))
+  outflow <- rep(out_median_sau, nrow(inflow_for_sau))
+}
+
+if (out_option==2){
+  sau_balance$date <- as.Date(sau_balance$date)
+  #select previous season
+  dates_previous <- seq(date_ini_previous, date_end_previous, by=1)
+  sel_pos <- sau_balance$date %in% dates_previous
+  pseas <- sau_balance[sel_pos,]
+  print(paste0("SAU outflow from last similar season ", date_ini_previous, "-",date_end_previous))
+  outflow <- pseas$Qout[1:nrow(inflow_for_sau)]
+}
 
 #Initial volume calculation SAU
 V_ini_sau <- sau_balance[sau_balance$date==(date_ini-1),"V"]
@@ -30,7 +50,7 @@ change_V_sau <- data.frame(matrix(NA,nrow(inflow_for_sau),members));
 V_total_sau <- data.frame(matrix(NA,nrow(inflow_for_sau),members))
 for (m in 1:members){
   # Qin - Qout
-  change_Q_sau[,m] <- inflow_for_sau[,(1+m)] - rep(out_median_sau, nrow(inflow_for_sau))
+  change_Q_sau[,m] <- inflow_for_sau[,(1+m)] - outflow
   
   #daily volume change per day in hm3
   change_V_sau[,m] <- change_Q_sau[,m]*(86400/1e6)
@@ -64,7 +84,7 @@ V_total_sau <- data.frame(matrix(NA,nrow(inflow_for_sau),members))
 Qout_sau <- data.frame(matrix(NA,nrow(inflow_for_sau),members))
 for (m in 1:members){
   # Qin - Qout
-  Qout_sau[,m] <- rep(out_median_sau, nrow(inflow_for_sau))
+  Qout_sau[,m] <- outflow
   change_Q_sau[,m] <- inflow_for_sau[,(1+m)] - Qout_sau[,m]
   
   #daily volume change per day in hm3
@@ -72,14 +92,14 @@ for (m in 1:members){
   
   #daily total volume
   V_total_temp <- (V_ini_sau+change_V_sau[1,m])
-  #assume Qin=Qout when volumen is lower than 5% or greater than 95%
-  if (V_total_temp<(unique(sau_balance$Vmax)*0.05)){
+  #assume Qin=Qout when volumen is lower than min_vol 5% or greater than 95%
+  if (V_total_temp<(unique(sau_balance$Vmax)*min_vol)){
     Qout_sau[1,m] <- inflow_for_sau[1,(1+m)]
     change_Q_sau[1,m] <- inflow_for_sau[1,(1+m)] - Qout_sau[1,m] #should be 0
     change_V_sau[1,m] <- change_Q_sau[1,m]*(86400/1e6)
     V_total_temp <- (V_ini_sau+change_V_sau[1,m])
   }
-  if (V_total_temp>(unique(sau_balance$Vmax)*0.95)){
+  if (V_total_temp>(unique(sau_balance$Vmax)*max_vol)){
     Qout_sau[1,m] <- inflow_for_sau[1,(1+m)]
     change_Q_sau[1,m] <- inflow_for_sau[1,(1+m)] - Qout_sau[1,m] #should be 0
     change_V_sau[1,m] <- change_Q_sau[1,m]*(86400/1e6)
@@ -89,7 +109,7 @@ for (m in 1:members){
   for (d in 2:nrow(inflow_for_sau)){
     V_total_temp <- (V_total_temp+change_V_sau[d,m])
     #assume Qin=Qout when volumen is lower than 5% or greater than 95%
-    if (V_total_temp<(unique(sau_balance$Vmax)*0.05)){
+    if (V_total_temp<(unique(sau_balance$Vmax)*min_vol)){
       V_total_temp <- (V_total_temp-change_V_sau[d,m])
       print(paste0("d: ", d, "m: ", m))
       Qout_sau[d,m] <- inflow_for_sau[d,(1+m)]
@@ -99,7 +119,7 @@ for (m in 1:members){
       print(change_Q_sau[d,m])
       change_V_sau[d,m] <- change_Q_sau[d,m]*(86400/1e6)
     }
-    if (V_total_temp>(unique(sau_balance$Vmax)*0.95)){
+    if (V_total_temp>(unique(sau_balance$Vmax)*max_vol)){
       V_total_temp <- (V_total_temp-change_V_sau[d,m])
       print(paste0("d: ", d, "m: ", m))
       Qout_sau[d,m] <- inflow_for_sau[d,(1+m)]

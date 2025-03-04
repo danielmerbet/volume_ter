@@ -3,8 +3,15 @@ library(lubridate); library(imputeTS)
 dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
 setwd(dir)
 
+#out_option <- 1 #1: median last x days
+out_option <- 2 #2: same as last similar season
+min_vol <- 0.00 #minimum volume in percentage
+max_vol <- 0.95
+
 #initialisation forecast
 date_ini <- as.Date("2024-10-01")
+date_ini_previous <- as.Date("2023-10-01")
+date_end_previous <- as.Date("2024-04-30")
 
 #calculated balances
 sqd_balance <- read.csv("out/calculated_sqd.csv")
@@ -12,15 +19,29 @@ sqd_balance <- read.csv("out/calculated_sqd.csv")
 #current balance for the actual dates
 sqd_balance_actual <- read.csv("in/water_balance_sqd_actual.csv")
 
-#median outflows of the last x days
-x_days <- 10
-dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
-sqd_balance$date <- as.Date(sqd_balance$date)
-out_median_sqd <- median(sqd_balance[sqd_balance$date %in% dates_median_out,]$Qout)
-print(paste0("SQD median outflow of last ", x_days, ": ",round(out_median_sqd,2)))
-
 #outflow from sau = inflow for sqd
 inflow_for_sqd<- read.csv("out/forecast_sau/for_Qout_sau.csv")
+
+#median outflows of the last x days
+if (out_option==1){
+  x_days <- 10
+  dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
+  sqd_balance$date <- as.Date(sqd_balance$date)
+  out_median_sqd <- median(sqd_balance[sqd_balance$date %in% dates_median_out,]$Qout)
+  print(paste0("SQD median outflow of last ", x_days, ": ",round(out_median_sqd,2)))
+  outflow <- rep(out_median_sqd, nrow(inflow_for_sqd))
+}
+
+if (out_option==2){
+  sqd_balance$date <- as.Date(sqd_balance$date)
+  #select previous season
+  dates_previous <- seq(date_ini_previous, date_end_previous, by=1)
+  sel_pos <- sqd_balance$date %in% dates_previous
+  pseas <- sqd_balance[sel_pos,]
+  print(paste0("SQD outflow from last similar season ", date_ini_previous, "-",date_end_previous))
+  outflow <- pseas$Qout[1:nrow(inflow_for_sqd)]
+}
+
 
 #Initial volume calculation sqd
 V_ini_sqd <- sqd_balance[which(sqd_balance$date==(date_ini-1)),"V"]
@@ -30,7 +51,7 @@ change_V_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members));
 V_total_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members))
 for (m in 1:members){
   # Qin - Qout
-  change_Q_sqd[,m] <- inflow_for_sqd[,(1+m)] - rep(out_median_sqd, nrow(inflow_for_sqd))
+  change_Q_sqd[,m] <- inflow_for_sqd[,(1+m)] - outflow
   
   #daily volume change per day in hm3
   change_V_sqd[,m] <- change_Q_sqd[,m]*(86400/1e6)
@@ -64,7 +85,7 @@ V_total_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members))
 Qout_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members))
 for (m in 1:members){
   # Qin - Qout
-  Qout_sqd[,m] <- rep(out_median_sqd, nrow(inflow_for_sqd))
+  Qout_sqd[,m] <- outflow
   change_Q_sqd[,m] <- inflow_for_sqd[,(1+m)] - Qout_sqd[,m]
   
   #daily volume change per day in hm3
@@ -79,7 +100,7 @@ for (m in 1:members){
     change_V_sqd[1,m] <- change_Q_sqd[1,m]*(86400/1e6)
     V_total_temp <- (V_ini_sqd+change_V_sqd[1,m])
   }
-  if (V_total_temp>(unique(sqd_balance$Vmax)*0.95)){
+  if (V_total_temp>(unique(sqd_balance$Vmax)*max_vol)){
     Qout_sqd[1,m] <- inflow_for_sqd[1,(1+m)]
     change_Q_sqd[1,m] <- inflow_for_sqd[1,(1+m)] - Qout_sqd[1,m] #should be 0
     change_V_sqd[1,m] <- change_Q_sqd[1,m]*(86400/1e6)
@@ -99,7 +120,7 @@ for (m in 1:members){
       print(change_Q_sqd[d,m])
       change_V_sqd[d,m] <- change_Q_sqd[d,m]*(86400/1e6)
     }
-    if (V_total_temp>(unique(sqd_balance$Vmax)*0.95)){
+    if (V_total_temp>(unique(sqd_balance$Vmax)*max_vol)){
       V_total_temp <- (V_total_temp-change_V_sqd[d,m])
       Qout_sqd[1,m] <- inflow_for_sqd[d,(1+m)]
       change_Q_sqd[1,m] <- inflow_for_sqd[d,(1+m)] - Qout_sqd[d,m] #should be 0
