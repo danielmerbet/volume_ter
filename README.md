@@ -18,7 +18,6 @@ This repository contains the seasonal forecast balance for the Ter River reservo
 
 ### SAU
 
-3_forecast_ter_ACA.png
 ![SAU Forecast](./plot/3_forecast_sau.png)
 
 ### SQD (Susqueda)
