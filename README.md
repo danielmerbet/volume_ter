@@ -12,7 +12,13 @@ This repository contains the seasonal forecast balance for the Ter River reservo
 
 ## Results
 
+### The whole Ter system, comparing with ACA method for predictions
+
+![Ter Forecast](./plot/3_forecast_ter_ACA.png)
+
 ### SAU
+
+3_forecast_ter_ACA.png
 ![SAU Forecast](./plot/3_forecast_sau.png)
 
 ### SQD (Susqueda)
