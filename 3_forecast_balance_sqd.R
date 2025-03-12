@@ -3,21 +3,29 @@ library(lubridate); library(imputeTS)
 dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
 setwd(dir)
 
+year_initial <- 2024
+month_initial <- "10"
+members <- 51
+fix_plot <- TRUE #to set as default plots and csv outputs
+plot_actual <- TRUE #plot current season
+
 #out_option <- 1 #1: median last x days
 out_option <- 2 #2: same as last similar season
 min_vol <- 0.00 #minimum volume in percentage
 max_vol <- 0.95
 
 #initialisation forecast
-date_ini <- as.Date("2024-10-01")
-date_ini_previous <- as.Date("2023-10-01")
-date_end_previous <- as.Date("2024-04-30")
+date_ini <- as.Date(paste0(year_initial,"-",month_initial,"-01"))
+all_dates <- seq(from=date_ini, by=1, len=215)
+#previous year forecast
+date_ini_previous <- as.Date(paste0(year(all_dates[1])-1, "-",month(all_dates[1]), "-01"))
+dates_previous <- seq(from=date_ini_previous, by=1, len=215)
 
 #calculated balances
 sqd_balance <- read.csv("out/calculated_sqd.csv")
 
 #current balance for the actual dates
-sqd_balance_actual <- read.csv("in/water_balance_sqd_actual.csv")
+sqd_balance_actual <- read.csv("in/water_balance_sqd.csv")
 
 #outflow from sau = inflow for sqd
 inflow_for_sqd<- read.csv("out/forecast_sau/for_Qout_sau.csv")
@@ -34,18 +42,13 @@ if (out_option==1){
 
 if (out_option==2){
   sqd_balance$date <- as.Date(sqd_balance$date)
-  #select previous season
-  dates_previous <- seq(date_ini_previous, date_end_previous, by=1)
   sel_pos <- sqd_balance$date %in% dates_previous
   pseas <- sqd_balance[sel_pos,]
-  print(paste0("SQD outflow from last similar season ", date_ini_previous, "-",date_end_previous))
   outflow <- pseas$Qout[1:nrow(inflow_for_sqd)]
 }
 
-
 #Initial volume calculation sqd
 V_ini_sqd <- sqd_balance[which(sqd_balance$date==(date_ini-1)),"V"]
-members <- 51
 change_Q_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members)); 
 change_V_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members)); 
 V_total_sqd <- data.frame(matrix(NA,nrow(inflow_for_sqd),members))
@@ -132,7 +135,7 @@ for (m in 1:members){
   
 }
 
-pdf("plot/3_forecast_sqd.pdf")
+pdf(paste0("plot/3_forecast_sqd_",year_initial,"_",month_initial,".pdf"))
 #plot corrected volumes
 plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
      ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
@@ -142,7 +145,7 @@ for (i in 2:51){
 #ensemble mean
 lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
 #real dynamic previous year
-dates_plot <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
+dates_plot <- dates_previous
 sel_pos <- sqd_balance$date %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
@@ -153,7 +156,7 @@ legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual seas
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
-png("plot/3_forecast_sqd.png", width = 800, height = 600, units = "px")
+png(paste0("plot/3_forecast_sqd_",year_initial,"_",month_initial,".png"), width = 800, height = 600, units = "px")
 #plot corrected volumes
 plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
      ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
@@ -163,7 +166,7 @@ for (i in 2:51){
 #ensemble mean
 lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
 #real dynamic previous year
-dates_plot <- seq(as.Date("2023-10-01"), as.Date("2024-04-30"), by=1)
+dates_plot <- dates_previous
 sel_pos <- sqd_balance$date %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
@@ -176,14 +179,73 @@ dev.off()
 
 #save results forecast
 write.csv(data.frame(date=inflow_for_sqd$date,change_Q_sqd), 
-          file="out/forecast_sqd/for_change_Q_sqd.csv",
+          file=paste0("out/forecast_sqd/for_change_Q_sqd_",year_initial,"_",month_initial,".csv"), 
           quote = F,row.names = F)
 write.csv(data.frame(date=inflow_for_sqd$date,change_V_sqd), 
-          file="out/forecast_sqd/for_change_V_sqd.csv",
+          file=paste0("out/forecast_sqd/for_change_V_sqd_",year_initial,"_",month_initial,".csv"),
           quote = F,row.names = F)
 write.csv(data.frame(date=inflow_for_sqd$date,Qout_sqd), 
-          file="out/forecast_sqd/for_Qout_sqd.csv",
+          file=paste0("out/forecast_sqd/for_Qout_sqd_",year_initial,"_",month_initial,".csv"),
           quote = F,row.names = F)
 write.csv(data.frame(date=inflow_for_sqd$date, V_total_sqd),
-          file="out/forecast_sqd/for_V_sqd.csv",
+          file=paste0("out/forecast_sqd/for_V_sqd_",year_initial,"_",month_initial,".csv"),
           quote = F,row.names = F)
+
+if (fix_plot){
+  pdf("plot/3_forecast_sqd.pdf")
+  #plot corrected volumes
+  plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
+       ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+  for (i in 2:51){
+    lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+  }
+  #ensemble mean
+  lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+  #real dynamic previous year
+  dates_plot <- dates_previous
+  sel_pos <- sqd_balance$date %in% dates_plot
+  #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
+  lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
+        col="blue", lwd=3)
+  lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
+        col="green", lwd=3)
+  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+         col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
+  dev.off()
+  
+  png("plot/3_forecast_sqd.png", width = 800, height = 600, units = "px")
+  #plot corrected volumes
+  plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
+       ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+  for (i in 2:51){
+    lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+  }
+  #ensemble mean
+  lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+  #real dynamic previous year
+  dates_plot <- dates_previous
+  sel_pos <- sqd_balance$date %in% dates_plot
+  #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
+  lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sqd$date)], 
+        col="blue", lwd=3)
+  lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
+        col="green", lwd=3)
+  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+         col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
+  dev.off()
+  
+  #save results forecast
+  write.csv(data.frame(date=inflow_for_sqd$date,change_Q_sqd), 
+            file="out/forecast_sqd/for_change_Q_sqd.csv", 
+            quote = F,row.names = F)
+  write.csv(data.frame(date=inflow_for_sqd$date,change_V_sqd), 
+            file="out/forecast_sqd/for_change_V_sqd.csv",
+            quote = F,row.names = F)
+  write.csv(data.frame(date=inflow_for_sqd$date,Qout_sqd), 
+            file="out/forecast_sqd/for_Qout_sqd.csv",
+            quote = F,row.names = F)
+  write.csv(data.frame(date=inflow_for_sqd$date, V_total_sqd),
+            file="out/forecast_sqd/for_V_sqd.csv",
+            quote = F,row.names = F)
+  
+}
