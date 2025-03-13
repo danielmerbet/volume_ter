@@ -25,10 +25,10 @@ dates_previous <- seq(from=date_ini_previous, by=1, len=215)
 sqd_balance <- read.csv("out/calculated_sqd.csv")
 
 #current balance for the actual dates
-sqd_balance_actual <- read.csv("in/water_balance_sqd.csv")
+sqd_balance_actual <- read.csv(paste0("in/water_balance_sqd.csv"))
 
 #outflow from sau = inflow for sqd
-inflow_for_sqd<- read.csv("out/forecast_sau/for_Qout_sau.csv")
+inflow_for_sqd<- read.csv(paste0("out/forecast_sau/for_Qout_sau_",year_initial,"_",month_initial,".csv"))
 
 #median outflows of the last x days
 if (out_option==1){
@@ -152,7 +152,7 @@ lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sq
       col="blue", lwd=3)
 lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
       col="green", lwd=3)
-legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
@@ -173,7 +173,7 @@ lines(as.Date(inflow_for_sqd$date),sqd_balance$V[sel_pos][1:length(inflow_for_sq
       col="blue", lwd=3)
 lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
       col="green", lwd=3)
-legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
@@ -209,7 +209,7 @@ if (fix_plot){
         col="blue", lwd=3)
   lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
         col="green", lwd=3)
-  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+  legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
          col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
   dev.off()
   
@@ -230,7 +230,7 @@ if (fix_plot){
         col="blue", lwd=3)
   lines(as.Date(sqd_balance_actual$date, format = "%m/%d/%Y"),sqd_balance_actual$V, 
         col="green", lwd=3)
-  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+  legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
          col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
   dev.off()
   

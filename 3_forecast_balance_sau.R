@@ -28,11 +28,11 @@ sau_balance <- read.csv("out/calculated_sau.csv")
 sau_balance_actual <- read.csv("in/water_balance_sau.csv")
 
 #load forecast sau
-inflow_for_sau <- read.csv("out/inflow_for_sau.csv") 
+inflow_for_sau <- read.csv(paste0("out/inflow_for_sau_",year_initial,"_",month_initial,".csv"))
 
 #median outflows of the last x days
 if (out_option==1){
-  x_days <- 5
+  x_days <- 10
   dates_median_out <- seq(date_ini-x_days,date_ini-1, by=1)
   sau_balance$date <- as.Date(sau_balance$date)
   out_median_sau <- median(sau_balance[sau_balance$date %in% dates_median_out,]$Qout)
@@ -156,7 +156,7 @@ if (plot_actual){
   lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),sau_balance_actual$V, 
         col="green", lwd=3)
 }
-legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
@@ -179,7 +179,7 @@ if (plot_actual){
   lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),sau_balance_actual$V, 
         col="green", lwd=3)
 }
-legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
@@ -218,7 +218,7 @@ if (fix_plot){
     lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),sau_balance_actual$V, 
           col="green", lwd=3)
   }
-  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+  legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
          col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
   dev.off()
   
@@ -241,7 +241,7 @@ if (fix_plot){
     lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),sau_balance_actual$V, 
           col="green", lwd=3)
   }
-  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+  legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
          col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
   dev.off()
   
