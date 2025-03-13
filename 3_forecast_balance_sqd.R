@@ -1,16 +1,20 @@
+#This code provides two outcomes: 
+#(1) volume forecasting for SUSQUEDA and
+#(2) probabilistic plots:
+#Created by D. Mercado-Bettín
+
 library(lubridate); library(imputeTS)
 
-dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
+dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
 
 year_initial <- 2024
-month_initial <- "10"
+month_initial <- "04"
 members <- 51
-fix_plot <- TRUE #to set as default plots and csv outputs
+fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
 
-#out_option <- 1 #1: median last x days
-out_option <- 2 #2: same as last similar season
+out_option <- 1 # 1: median last x days 2: same as last similar season
 min_vol <- 0.00 #minimum volume in percentage
 max_vol <- 0.95
 

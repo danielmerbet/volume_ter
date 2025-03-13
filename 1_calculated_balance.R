@@ -3,7 +3,7 @@ library(lubridate); library(imputeTS)
 #SAU
 #data since 2017
 #load original data: volume, inflows, outflows and gate extractions
-dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
+dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
 
 data <- read.csv("in/water_balance_sau.csv")

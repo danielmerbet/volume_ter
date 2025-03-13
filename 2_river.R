@@ -1,16 +1,18 @@
-#This code has two main steps: the (1) river forecasting modeling and (2) probabilistic plots:
+#This code provides two outcomes:
+#the (1) river forecasting modeling and
+#(2) probabilistic plots:
 #Created by D. Mercado-Bettín
 
-library(loadeR);library(lubridate); library(visualizeR); library(sp); library(airGR);
+library(lubridate); library(airGR);
 
-dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
+dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
 year_initial <- 2024
-month_initial <- "10"
+month_initial <- "04"
 date_ini <- as.Date(paste0(year_initial,"-",month_initial,"-01"))
 all_dates <- seq(from=date_ini, by=1, len=215)
-fix_plot <- TRUE #to set as default plots and csv outputs
-bias_corrected <- TRUE #whether to use bias corrected data or not (only for 2024-10 intialization)
+fix_plot <- FALSE#to set as default plots and csv outputs
+bias_corrected <- FALSE#whether to use bias corrected data or not (only for 2024-10 intialization
 
 years_fore <- unique(year(all_dates)) #2024:2025 #For System5 it could be a vector of two years, or one single year
 years_rean <- (years_fore[1]-2):years_fore[1]# c(2022:2024) #For ERA5 (2 years spin up)
@@ -108,16 +110,16 @@ write.csv(save_data,
           quote = F, row.names = F)
 
 pdf(paste0("plot/2_inflow_sau_ensemble_",year_initial,"_",month_initial,".pdf"))
-plot(discharge_data[1,], type="l", ylim=c(0,700), col="blue")
+plot(save_data$date, discharge_data[1,], type="l", ylim=c(0,700), col="blue")
 for (i in 2:51){
-  lines(discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
+  lines(save_data$date,discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
 }
 dev.off()
 
 png(paste0("plot/2_inflow_sau_ensemble_",year_initial,"_",month_initial,".png"), width = 800, height = 600, units = "px")
-plot(discharge_data[1,], type="l", ylim=c(0,700), col="blue")
+plot(save_data$date, discharge_data[1,], type="l", ylim=c(0,700), col="blue")
 for (i in 2:51){
-  lines(discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
+  lines(save_data$date, discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
 }
 dev.off()
 
@@ -129,14 +131,14 @@ if (fix_plot){
   pdf("plot/2_inflow_sau_ensemble.pdf")
   plot(discharge_data[1,], type="l", ylim=c(0,700), col="blue")
   for (i in 2:51){
-    lines(discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
+    lines(save_data$date, discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
   }
   dev.off()
   
   png("plot/2_inflow_sau_ensemble.png", width = 800, height = 600, units = "px")
   plot(discharge_data[1,], type="l", ylim=c(0,700), col="blue")
   for (i in 2:51){
-    lines(discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
+    lines(save_data$date, discharge_data[i,], col="blue", ylab="Qin (m³/s)", xlab="Date")
   }
   dev.off()
 }

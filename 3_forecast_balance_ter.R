@@ -1,10 +1,17 @@
-dir <- "/home/dmercado/Documents/intoDBP/volume_ter/"
+#This code provides two outcomes: 
+#(1) volume forecasting for all Ter system (SAU+SUSQUEDA) and
+#(2) probabilistic plots:
+#Created by D. Mercado-Bettín
+
+library(lubridate)
+
+dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
 
 year_initial <- 2024
-month_initial <- "10"
+month_initial <- "04"
 members <- 51
-fix_plot <- TRUE #to set as default plots and csv outputs
+fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
 
 #initialisation forecast
