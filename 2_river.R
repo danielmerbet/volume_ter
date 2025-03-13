@@ -3,12 +3,12 @@
 #(2) probabilistic plots:
 #Created by D. Mercado-Bettín
 
-library(lubridate); library(airGR);
+library(lubridate); library(airGR)
 
-dir <- "~/Documents/intoDBP/volume_ter"
+dir <- "/home/rmarce/volume_ter/"
 setwd(dir)
-year_initial <- 2023
-month_initial <- "03"
+year_initial <- 2024
+month_initial <- "10"
 date_ini <- as.Date(paste0(year_initial,"-",month_initial,"-01"))
 all_dates <- seq(from=date_ini, by=1, len=215)
 fix_plot <- FALSE #to set as default plots and csv outputs

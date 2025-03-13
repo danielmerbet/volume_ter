@@ -5,18 +5,18 @@
 
 library(lubridate); library(imputeTS)
 
-dir <- "~/Documents/intoDBP/volume_ter"
+dir <- "/home/rmarce/volume_ter/"
 setwd(dir)
 
-year_initial <- 2023
-month_initial <- "03"
+year_initial <- 2024
+month_initial <- "10"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
 
 out_option <- 1 # 1: median last x days 2: same as last similar season
 min_vol <- 0.00 #minimum volume in percentage
-max_vol <- 0.95 #maximum volume in percentage
+max_vol <- 1 #maximum volume in percentage
 
 #initialisation forecast
 date_ini <- as.Date(paste0(year_initial,"-",month_initial,"-01"))
@@ -83,8 +83,8 @@ for (i in 2:51){
 #Corrected volume calculation SAU
 #There are some V negative and some other greater than the maximum
 #we will limit the approach by:
-#1. if the volume get lower than 5%, it convert into river, so Qin = Qout
-#2. if the volume get higher than 95%, then also Qin = Qout
+#1. if the volume get lower than the defined minimum above, it convert into river, so Qin = Qout
+#2. if the volume get higher than the defined maximum above, then also Qin = Qout
 
 
 change_Q_sau <- data.frame(matrix(NA,nrow(inflow_for_sau),members)); 
@@ -101,7 +101,7 @@ for (m in 1:members){
   
   #daily total volume
   V_total_temp <- (V_ini_sau+change_V_sau[1,m])
-  #assume Qin=Qout when volumen is lower than min_vol 5% or greater than 95%
+  #assume Qin=Qout when volumen is lower than min_vol or greater than max_vol
   if (V_total_temp<(unique(sau_balance$Vmax)*min_vol)){
     Qout_sau[1,m] <- inflow_for_sau[1,(1+m)]
     change_Q_sau[1,m] <- inflow_for_sau[1,(1+m)] - Qout_sau[1,m] #should be 0
@@ -144,12 +144,19 @@ for (m in 1:members){
 pdf(paste0("plot/3_forecast_sau_",year_initial,"_",month_initial,".pdf"))
 #plot corrected volumes
 plot(as.Date(inflow_for_sau$date), V_total_sau[,1], type="l", 
-     ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date")
+     ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date",col="lightgrey")
 for (i in 2:51){
-  lines(as.Date(inflow_for_sau$date), V_total_sau[,i])
+  lines(as.Date(inflow_for_sau$date), V_total_sau[,i],col="lightgrey")
 }
 #ensemble mean
-lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+#lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+#ensemble meadian!!!RAFA
+lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, median), col="red", lwd=3)
+#ensemble percentiles!!!RAFA
+lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.90), lty=2, col="red", lwd=3)
+lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.10), lty=2, col="red", lwd=3)
+
+
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- sau_balance$date %in% dates_plot
@@ -167,12 +174,17 @@ dev.off()
 png(paste0("plot/3_forecast_sau_",year_initial,"_",month_initial,".png"), width = 800, height = 600, units = "px")
 #plot corrected volumes
 plot(as.Date(inflow_for_sau$date), V_total_sau[,1], type="l", 
-     ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date")
+     ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date",col="lightgrey")
 for (i in 2:51){
-  lines(as.Date(inflow_for_sau$date), V_total_sau[,i])
+  lines(as.Date(inflow_for_sau$date), V_total_sau[,i],col="lightgrey")
 }
 #ensemble mean
-lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+#lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+#ensemble meadian!!!RAFA
+lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, median), col="red", lwd=3)
+#ensemble percentiles!!!RAFA
+lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.90), lty=2, col="red", lwd=3)
+lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.10), lty=2, col="red", lwd=3)
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- sau_balance$date %in% dates_plot
@@ -206,12 +218,17 @@ if (fix_plot){
   pdf("plot/3_forecast_sau.pdf")
   #plot corrected volumes
   plot(as.Date(inflow_for_sau$date), V_total_sau[,1], type="l", 
-       ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date")
+       ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date",col="lightgrey")
   for (i in 2:51){
-    lines(as.Date(inflow_for_sau$date), V_total_sau[,i])
+    lines(as.Date(inflow_for_sau$date), V_total_sau[,i],col="lightgrey")
   }
   #ensemble mean
-  lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+  #lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+  #ensemble meadian!!!RAFA
+  lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, median), col="red", lwd=3)
+  #ensemble percentiles!!!RAFA
+  lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.90), lty=2, col="red", lwd=3)
+  lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.10), lty=2, col="red", lwd=3)
   #real dynamic previous year
   dates_plot <- dates_previous
   sel_pos <- sau_balance$date %in% dates_plot
@@ -229,12 +246,17 @@ if (fix_plot){
   png("plot/3_forecast_sau.png", width = 800, height = 600, units = "px")
   #plot corrected volumes
   plot(as.Date(inflow_for_sau$date), V_total_sau[,1], type="l", 
-       ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date")
+       ylim=c(0,unique(sau_balance$Vmax)), ylab="Volume Sau (hm³)", xlab="Date",col="lightgrey")
   for (i in 2:51){
-    lines(as.Date(inflow_for_sau$date), V_total_sau[,i])
+    lines(as.Date(inflow_for_sau$date), V_total_sau[,i],col="lightgrey")
   }
   #ensemble mean
-  lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+  #lines(as.Date(inflow_for_sau$date), rowMeans(V_total_sau), col="red", lwd=3)
+  #ensemble meadian!!!RAFA
+  lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, median), col="red", lwd=3)
+  #ensemble percentiles!!!RAFA
+  lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.90), lty=2, col="red", lwd=3)
+  lines(as.Date(inflow_for_sau$date), apply(V_total_sau, 1, quantile,0.10), lty=2, col="red", lwd=3)
   #real dynamic previous year
   dates_plot <- dates_previous
   sel_pos <- sau_balance$date %in% dates_plot

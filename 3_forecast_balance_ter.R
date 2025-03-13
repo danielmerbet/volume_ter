@@ -5,11 +5,11 @@
 
 library(lubridate)
 
-dir <- "~/Documents/intoDBP/volume_ter"
+dir <- "/home/rmarce/volume_ter/"
 setwd(dir)
 
-year_initial <- 2023
-month_initial <- "03"
+year_initial <- 2024
+month_initial <- "10"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
@@ -21,6 +21,7 @@ all_dates <- seq(from=date_ini, by=1, len=215)
 date_ini_previous <- as.Date(paste0(year(all_dates[1])-1, "-",month(all_dates[1]), "-01"))
 dates_previous <- seq(from=date_ini_previous, by=1, len=215)
 
+#RAFA: no entiendo como se trabaja esto...
 #add ACA data
 #dates_aca <- seq(as.Date("2023-04-01"), as.Date("2025-05-31"),1)
 dates_aca <- seq(as.Date(paste0((year_initial-1),"-04-01")), 
@@ -59,43 +60,86 @@ ter_balance_actual_V <- sqd_balance_actual$V+sau_balance_actual$V
 pdf(paste0("plot/3_forecast_ter_",year_initial,"_",month_initial,".pdf"))
 #plot corrected volumes
 plot(as.Date(V_sau$date), V_total[,1], type="l", 
-     ylim=c(0,unique(sqd_balance$Vmax+sau_balance$Vmax)),  ylab="Volume Ter (hm³)", xlab="Date")
+     ylim=c(0,unique(sqd_balance$Vmax+sau_balance$Vmax)),  ylab="Volume Ter (hm³)", xlab="Date", col="lightgrey")
 for (i in 2:51){
-  lines(as.Date(V_sau$date), V_total[,i])
+  lines(as.Date(V_sau$date), V_total[,i], col="lightgrey")
 }
-#ensemble mean
-lines(as.Date(V_sau$date), rowMeans(V_total), col="red", lwd=3)
+# Ensemble percentiles
+# 0.90 and 0.10 percentiles
+upper_90 <- apply(V_total, 1, quantile, 0.90)
+lower_10 <- apply(V_total, 1, quantile, 0.1)
+
+# Plot the shaded area between 0.90 and 0.10 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_90, rev(lower_10)),
+        col=rgb(0, 0, 1, 0.2), border=NA)  # Red with transparency
+
+# 0.75 and 0.25 percentiles
+upper_75 <- apply(V_total, 1, quantile, 0.75)
+lower_25 <- apply(V_total, 1, quantile, 0.25)
+
+# Plot the shaded area between 0.75 and 0.25 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_75, rev(lower_25)),
+        col=rgb(0, 0, 0.6, 0.3), border=NA)  # Dark red with transparency
+
+# Plot the ensemble median
+lines(as.Date(V_sau$date), apply(V_total, 1, median), col="blue", lwd=3)
+
+
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- as.Date(sqd_balance$date) %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)], 
-      col="blue", lwd=3)
+      col="black", lwd=1.5)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
 legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
-       col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
+       col=c("blue","black", "lightgrey","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
 png(paste0("plot/3_forecast_ter_",year_initial,"_",month_initial,".png"), width = 800, height = 600, units = "px")
 #plot corrected volumes
 plot(as.Date(V_sau$date), V_total[,1], type="l", 
-     ylim=c(0,unique(sqd_balance$Vmax+sau_balance$Vmax)),  ylab="Volume Ter (hm³)", xlab="Date")
+     ylim=c(0,unique(sqd_balance$Vmax+sau_balance$Vmax)),  ylab="Volume Ter (hm³)", xlab="Date", col="lightgrey")
 for (i in 2:51){
-  lines(as.Date(V_sau$date), V_total[,i])
+  lines(as.Date(V_sau$date), V_total[,i], col="lightgrey")
 }
-#ensemble mean
-lines(as.Date(V_sau$date), rowMeans(V_total), col="red", lwd=3)
+# Ensemble percentiles
+# 0.90 and 0.10 percentiles
+upper_90 <- apply(V_total, 1, quantile, 0.90)
+lower_10 <- apply(V_total, 1, quantile, 0.1)
+
+# Plot the shaded area between 0.90 and 0.10 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_90, rev(lower_10)),
+        col=rgb(0, 0, 1, 0.2), border=NA)  # Red with transparency
+
+# 0.75 and 0.25 percentiles
+upper_75 <- apply(V_total, 1, quantile, 0.75)
+lower_25 <- apply(V_total, 1, quantile, 0.25)
+
+# Plot the shaded area between 0.75 and 0.25 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_75, rev(lower_25)),
+        col=rgb(0, 0, 0.6, 0.3), border=NA)  # Dark red with transparency
+
+# Plot the ensemble median
+lines(as.Date(V_sau$date), apply(V_total, 1, median), col="blue", lwd=3)
+
+
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- as.Date(sqd_balance$date) %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)], 
-      col="blue", lwd=3)
+      col="black", lwd=1.5)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
 legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
-       col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
+       col=c("blue","black", "lightgrey","green"), lty=1, cex=0.8, bty="n")
+
 dev.off()
 
 pdf(paste0("plot/3_forecast_ter_ACA_",year_initial,"_",month_initial,".pdf"))
@@ -105,50 +149,72 @@ plot(as.Date(V_sau$date), V_total[,1], type="l", col="lightgray",
 for (i in 2:51){
   lines(as.Date(V_sau$date), V_total[,i], col="lightgray")
 }
-#ensemble mean
-lines(as.Date(V_sau$date), rowMeans(V_total), col="red", lwd=3)
+
+
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- as.Date(sqd_balance$date) %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)], 
-      col="blue", lwd=3)
+      col="black", lwd=1.5)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
 #ACA data
-lines(aca_p50$dates, aca_p50$V2, lty=2 ,col="darkblue", lwd=3)
-lines(aca_p25$dates, aca_p25$V2, lty=2 ,col="lightblue", lwd=3)
-lines(aca_p15$dates, aca_p15$V2, lty=2 ,col="gray", lwd=3)
-lines(aca_p5$dates, aca_p5$V2, lty=2 ,col="gold3", lwd=3)
-lines(aca_min$dates, aca_min$V2, lty=2 ,col="darkred", lwd=3)
+# lines(aca_p50$dates, aca_p50$V2, lty=2 ,col="darkblue", lwd=3)
+# lines(aca_p25$dates, aca_p25$V2, lty=2 ,col="lightblue", lwd=3)
+# lines(aca_p15$dates, aca_p15$V2, lty=2 ,col="gray", lwd=3)
+# lines(aca_p5$dates, aca_p5$V2, lty=2 ,col="gold3", lwd=3)
+# lines(aca_min$dates, aca_min$V2, lty=2 ,col="darkred", lwd=3)
 #Emergència III
 ini_date <- as.Date(V_sau$date)[1]
 end_date <- as.Date(V_sau$date)[dim(V_sau)[1]]
 rect(xleft = ini_date-30, ybottom = 0, 
      xright = end_date+30, ytop = 14, 
-     col = get_col_transparent("brown3", 0.15), border = NA)
+     col = get_col_transparent("brown3", 0.5), border = NA)
 #Emergència II
 rect(xleft = ini_date-30, ybottom = 14, 
      xright = end_date+30, ytop = 42.6, 
-     col = get_col_transparent("brown1", 0.15), border = NA)
+     col = get_col_transparent("brown1", 0.5), border = NA)
 #Emergència I
 rect(xleft = ini_date-30, ybottom = 42.6, 
      xright = end_date+30, ytop = 64.60, 
-     col = get_col_transparent("coral1", 0.15), border = NA)
+     col = get_col_transparent("coral1", 0.5), border = NA)
 #Excepcionalitat
 rect(xleft = ini_date-30, ybottom = 64.60, 
      xright = end_date+30, ytop = 85.20, 
-     col = get_col_transparent("orange", 0.15), border = NA)
+     col = get_col_transparent("orange", 0.5), border = NA)
 #Alerta
 rect(xleft = ini_date-30, ybottom = 85.20, 
      xright = end_date+30, ytop = 121, 
-     col = get_col_transparent("yellow", 0.15), border = NA)
-rect(xleft = as.Date("2025-02-01"), ybottom = 121, 
+     col = get_col_transparent("yellow", 0.5), border = NA)
+rect(xleft = as.Date("2023-02-01"), ybottom = 121, 
      xright = end_date+30, ytop = 140, 
-     col = get_col_transparent("yellow", 0.15), border = NA)
-rect(xleft = as.Date("2025-03-01"), ybottom = 140, 
+     col = get_col_transparent("yellow", 0.5), border = NA)
+rect(xleft = as.Date("2023-03-01"), ybottom = 140, 
      xright = end_date+30, ytop = 160, 
-     col = get_col_transparent("yellow", 0.15), border = NA)
+     col = get_col_transparent("yellow", 0.5), border = NA)
+
+# Ensemble percentiles
+# 0.90 and 0.10 percentiles
+upper_90 <- apply(V_total, 1, quantile, 0.90)
+lower_10 <- apply(V_total, 1, quantile, 0.1)
+
+# Plot the shaded area between 0.90 and 0.10 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_90, rev(lower_10)),
+        col=rgb(0, 0, 1, 0.2), border=NA)  # Red with transparency
+
+# 0.75 and 0.25 percentiles
+upper_75 <- apply(V_total, 1, quantile, 0.75)
+lower_25 <- apply(V_total, 1, quantile, 0.25)
+
+# Plot the shaded area between 0.75 and 0.25 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_75, rev(lower_25)),
+        col=rgb(0, 0, 0.6, 0.3), border=NA)  # Dark red with transparency
+
+# Plot the ensemble median
+lines(as.Date(V_sau$date), apply(V_total, 1, median), col="blue", lwd=3)
 
 legend("topleft", legend=c("Ensemble", "51 members", 
                            "Actual season", "Previous season", 
@@ -166,14 +232,13 @@ plot(as.Date(V_sau$date), V_total[,1], type="l", col="lightgray",
 for (i in 2:51){
   lines(as.Date(V_sau$date), V_total[,i], col="lightgray")
 }
-#ensemble mean
-lines(as.Date(V_sau$date), rowMeans(V_total), col="red", lwd=3)
+
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- as.Date(sqd_balance$date) %in% dates_plot
 #plot(sqd_balance$date[sel_pos],sqd_balance$V[sel_pos], type="l")
 lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)], 
-      col="blue", lwd=3)
+      col="black", lwd=1.5)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
 #ACA data
@@ -210,6 +275,27 @@ rect(xleft = as.Date("2025-02-01"), ybottom = 121,
 rect(xleft = as.Date("2025-03-01"), ybottom = 140, 
      xright = end_date+30, ytop = 160, 
      col = get_col_transparent("yellow", 0.15), border = NA)
+# Ensemble percentiles
+# 0.90 and 0.10 percentiles
+upper_90 <- apply(V_total, 1, quantile, 0.90)
+lower_10 <- apply(V_total, 1, quantile, 0.1)
+
+# Plot the shaded area between 0.90 and 0.10 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_90, rev(lower_10)),
+        col=rgb(0, 0, 1, 0.2), border=NA)  # Red with transparency
+
+# 0.75 and 0.25 percentiles
+upper_75 <- apply(V_total, 1, quantile, 0.75)
+lower_25 <- apply(V_total, 1, quantile, 0.25)
+
+# Plot the shaded area between 0.75 and 0.25 percentiles with transparency
+polygon(c(as.Date(V_sau$date), rev(as.Date(V_sau$date))), 
+        c(upper_75, rev(lower_25)),
+        col=rgb(0, 0, 0.6, 0.3), border=NA)  # Dark red with transparency
+
+# Plot the ensemble median
+lines(as.Date(V_sau$date), apply(V_total, 1, median), col="blue", lwd=3)
 
 legend("topleft", legend=c("Ensemble", "51 members", 
                            "Actual season", "Previous season", 
@@ -220,6 +306,7 @@ legend("topleft", legend=c("Ensemble", "51 members",
        lty=c(rep(1,4),rep(2,5)), cex=0.8, bty="n")
 dev.off()
 
+#RAFA: I did not update this
 if (fix_plot){
   pdf("plot/3_forecast_ter.pdf")
   #plot corrected volumes

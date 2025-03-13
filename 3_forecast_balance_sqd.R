@@ -3,20 +3,20 @@
 #(2) probabilistic plots:
 #Created by D. Mercado-Bettín
 
-library(lubridate); library(imputeTS)
+library(lubridate); library(imputeTS);library(zoo);library(dplyr)
 
-dir <- "~/Documents/intoDBP/volume_ter"
+dir <- "/home/rmarce/volume_ter/"
 setwd(dir)
 
-year_initial <- 2023
-month_initial <- "03"
+year_initial <- 2024
+month_initial <- "10"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
 
-out_option <- 1 # 1: median last x days 2: same as last similar season
-min_vol <- 0.00 #minimum volume in percentage
-max_vol <- 0.95
+out_option <- 3 # 1: median last x days 2: same as last similar season 3: from Comissio de desembassament
+min_vol <- 0 #minimum volume in percentage
+max_vol <- 1
 
 #initialisation forecast
 date_ini <- as.Date(paste0(year_initial,"-",month_initial,"-01"))
@@ -50,6 +50,24 @@ if (out_option==2){
   pseas <- sqd_balance[sel_pos,]
   outflow <- pseas$Qout[1:nrow(inflow_for_sqd)]
 }
+
+if (out_option==3){
+  outflows_monthly_CD <- read.csv("in/Cabals_outflow_mensuals.csv",stringsAsFactors = FALSE)
+  outflows_monthly_CD$date_M_D_Y <- mdy(outflows_monthly_CD$date_M_D_Y)
+  outflows_monthly_CD$month_year <- format(outflows_monthly_CD$date, "%Y-%m")
+  monthly_values <- outflows_monthly_CD %>%
+    group_by(month_year) %>%
+    summarise(month_value = first(outflow), .groups = 'drop') 
+  
+  dates_out <- seq(date_ini,date_ini+nrow(inflow_for_sqd)-1, by=1)
+  dates_out_monthly <- format(dates_out, "%Y-%m")
+  
+  outflow <- data.frame(date = dates_out) %>%
+    mutate(month_year = format(date, "%Y-%m")) %>%
+    left_join(monthly_values, by = "month_year") %>%
+    arrange(date) 
+  outflow <- as.data.frame(outflow$month_value)
+  }
 
 #Initial volume calculation sqd
 V_ini_sqd <- sqd_balance[which(sqd_balance$date==(date_ini-1)),"V"]
@@ -101,7 +119,7 @@ for (m in 1:members){
   #daily total volume
   V_total_temp <- (V_ini_sqd+change_V_sqd[1,m])
   #assume Qin=Qout when volumen is lower than 5% or greater than 95%
-  if (V_total_temp<(unique(sqd_balance$Vmax)*0.05)){
+  if (V_total_temp<(unique(sqd_balance$Vmax)*min_vol)){
     Qout_sqd[1,m] <- inflow_for_sqd[1,(1+m)]
     change_Q_sqd[1,m] <- inflow_for_sqd[1,(1+m)] - Qout_sqd[1,m] #should be 0
     change_V_sqd[1,m] <- change_Q_sqd[1,m]*(86400/1e6)
@@ -117,7 +135,7 @@ for (m in 1:members){
   for (d in 2:nrow(inflow_for_sqd)){
     V_total_temp <- (V_total_temp+change_V_sqd[d,m])
     #assume Qin=Qout when volumen is lower than 5% or greater than 95%
-    if (V_total_temp<(unique(sqd_balance$Vmax)*0.05)){
+    if (V_total_temp<(unique(sqd_balance$Vmax)*min_vol)){
       V_total_temp <- (V_total_temp-change_V_sqd[d,m])
       print(paste0("d: ", d, "m: ", m))
       Qout_sqd[d,m] <- inflow_for_sqd[d,(1+m)]
@@ -142,12 +160,17 @@ for (m in 1:members){
 pdf(paste0("plot/3_forecast_sqd_",year_initial,"_",month_initial,".pdf"))
 #plot corrected volumes
 plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
-     ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+     ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date",col="lightgrey")
 for (i in 2:51){
-  lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+  lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i],col="lightgrey")
 }
 #ensemble mean
-lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+#lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+#ensemble meadian!!!RAFA
+lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, median), col="red", lwd=3)
+#ensemble percentiles!!!RAFA
+lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.90), lty=2, col="red", lwd=3)
+lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.10), lty=2, col="red", lwd=3)
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- sqd_balance$date %in% dates_plot
@@ -163,12 +186,17 @@ dev.off()
 png(paste0("plot/3_forecast_sqd_",year_initial,"_",month_initial,".png"), width = 800, height = 600, units = "px")
 #plot corrected volumes
 plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
-     ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+     ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date",col="lightgrey")
 for (i in 2:51){
-  lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+  lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i],col="lightgrey")
 }
 #ensemble mean
-lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+#lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+#ensemble meadian!!!RAFA
+lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, median), col="red", lwd=3)
+#ensemble percentiles!!!RAFA
+lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.90), lty=2, col="red", lwd=3)
+lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.10), lty=2, col="red", lwd=3)
 #real dynamic previous year
 dates_plot <- dates_previous
 sel_pos <- sqd_balance$date %in% dates_plot
@@ -199,12 +227,17 @@ if (fix_plot){
   pdf("plot/3_forecast_sqd.pdf")
   #plot corrected volumes
   plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
-       ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+       ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date",col="lightgrey")
   for (i in 2:51){
-    lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+    lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i],col="lightgrey")
   }
   #ensemble mean
-  lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+  #lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+  #ensemble meadian!!!RAFA
+  lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, median), col="red", lwd=3)
+  #ensemble percentiles!!!RAFA
+  lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.90), lty=2, col="red", lwd=3)
+  lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.10), lty=2, col="red", lwd=3)
   #real dynamic previous year
   dates_plot <- dates_previous
   sel_pos <- sqd_balance$date %in% dates_plot
@@ -220,12 +253,17 @@ if (fix_plot){
   png("plot/3_forecast_sqd.png", width = 800, height = 600, units = "px")
   #plot corrected volumes
   plot(as.Date(inflow_for_sqd$date), V_total_sqd[,1], type="l", 
-       ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date")
+       ylim=c(0,unique(sqd_balance$Vmax)),  ylab="Volume SQD (hm³)", xlab="Date",col="lightgrey")
   for (i in 2:51){
-    lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i])
+    lines(as.Date(inflow_for_sqd$date), V_total_sqd[,i],col="lightgrey")
   }
   #ensemble mean
-  lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+  #lines(as.Date(inflow_for_sqd$date), rowMeans(V_total_sqd), col="red", lwd=3)
+  #ensemble meadian!!!RAFA
+  lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, median), col="red", lwd=3)
+  #ensemble percentiles!!!RAFA
+  lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.90), lty=2, col="red", lwd=3)
+  lines(as.Date(inflow_for_sqd$date), apply(V_total_sqd, 1, quantile,0.10), lty=2, col="red", lwd=3)
   #real dynamic previous year
   dates_plot <- dates_previous
   sel_pos <- sqd_balance$date %in% dates_plot
