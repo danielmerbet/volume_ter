@@ -8,8 +8,8 @@ library(lubridate)
 dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
 
-year_initial <- 2024
-month_initial <- "04"
+year_initial <- 2023
+month_initial <- "03"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
@@ -73,7 +73,7 @@ lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)],
       col="blue", lwd=3)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
-legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
@@ -94,7 +94,7 @@ lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)],
       col="blue", lwd=3)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
-legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
        col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
 dev.off()
 
@@ -151,7 +151,7 @@ rect(xleft = as.Date("2025-03-01"), ybottom = 140,
      col = get_col_transparent("yellow", 0.15), border = NA)
 
 legend("topleft", legend=c("Ensemble", "51 members", 
-                           "Actual season", "Last season", 
+                           "Actual season", "Previous season", 
                            "P50", "P25", "P15", "P5", "MIN"), 
        col=c("red","lightgray",
              "green","blue",
@@ -212,7 +212,7 @@ rect(xleft = as.Date("2025-03-01"), ybottom = 140,
      col = get_col_transparent("yellow", 0.15), border = NA)
 
 legend("topleft", legend=c("Ensemble", "51 members", 
-                           "Actual season", "Last season", 
+                           "Actual season", "Previous season", 
                            "P50", "P25", "P15", "P5", "MIN"), 
        col=c("red","lightgray",
              "green","blue",
@@ -238,7 +238,7 @@ if (fix_plot){
         col="blue", lwd=3)
   lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
         col="green", lwd=3)
-  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+  legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
          col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
   dev.off()
   
@@ -259,7 +259,7 @@ if (fix_plot){
         col="blue", lwd=3)
   lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
         col="green", lwd=3)
-  legend("topleft", legend=c("Ensemble", "Last season", "51 members", "Actual season"), 
+  legend("topleft", legend=c("Ensemble", "Previous season", "51 members", "Actual season"), 
          col=c("red","blue", "black","green"), lty=1, cex=0.8, bty="n")
   dev.off()
   
@@ -316,7 +316,7 @@ if (fix_plot){
        col = get_col_transparent("yellow", 0.15), border = NA)
   
   legend("topleft", legend=c("Ensemble", "51 members", 
-                             "Actual season", "Last season", 
+                             "Actual season", "Previous season", 
                              "P50", "P25", "P15", "P5", "MIN"), 
          col=c("red","lightgray",
                "green","blue",
@@ -377,7 +377,7 @@ if (fix_plot){
        col = get_col_transparent("yellow", 0.15), border = NA)
   
   legend("topleft", legend=c("Ensemble", "51 members", 
-                             "Actual season", "Last season", 
+                             "Actual season", "Previous season", 
                              "P50", "P25", "P15", "P5", "MIN"), 
          col=c("red","lightgray",
                "green","blue",

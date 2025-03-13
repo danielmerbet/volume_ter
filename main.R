@@ -3,12 +3,12 @@ dir <- "~/Documents/intoDBP/volume_ter/"
 setwd(dir)
 
 #####MANDATORY FIELDS TO CHANGE###############
-year_initial <- 2024
-month_initial <- "04"
+year_initial <- 2023
+month_initial <- "03" #"01":january, "03":march, "11":november etc...
 #outflow option: 1 or 2
 # 1 is the median value of the last x days
 # 2 the same as previous season (IT COULD HAVE ERRORS if it was too different than current season)
-out_option <- 1 
+out_option <- 1
 if (out_option==1){
   x_days <- 10
 }

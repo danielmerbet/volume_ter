@@ -7,12 +7,12 @@ library(lubridate); library(airGR);
 
 dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
-year_initial <- 2024
-month_initial <- "04"
+year_initial <- 2023
+month_initial <- "03"
 date_ini <- as.Date(paste0(year_initial,"-",month_initial,"-01"))
 all_dates <- seq(from=date_ini, by=1, len=215)
-fix_plot <- FALSE#to set as default plots and csv outputs
-bias_corrected <- FALSE#whether to use bias corrected data or not (only for 2024-10 intialization
+fix_plot <- FALSE #to set as default plots and csv outputs
+bias_corrected <- FALSE #whether to use bias corrected data or not (only for 2024-10 intialization
 
 years_fore <- unique(year(all_dates)) #2024:2025 #For System5 it could be a vector of two years, or one single year
 years_rean <- (years_fore[1]-2):years_fore[1]# c(2022:2024) #For ERA5 (2 years spin up)

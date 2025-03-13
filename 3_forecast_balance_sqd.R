@@ -8,8 +8,8 @@ library(lubridate); library(imputeTS)
 dir <- "~/Documents/intoDBP/volume_ter"
 setwd(dir)
 
-year_initial <- 2024
-month_initial <- "04"
+year_initial <- 2023
+month_initial <- "03"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
