@@ -159,12 +159,22 @@ lines(as.Date(V_sau$date),ter_balance_V[sel_pos][1:length(V_sau$date)],
       col="black", lwd=1.5)
 lines(as.Date(sau_balance_actual$date, format = "%m/%d/%Y"),ter_balance_actual_V, 
       col="green", lwd=3)
+points(as.Date("03/14/2025",format = "%m/%d/%Y"),145,pch=19,  col="green")
 #ACA data
 # lines(aca_p50$dates, aca_p50$V2, lty=2 ,col="darkblue", lwd=3)
 # lines(aca_p25$dates, aca_p25$V2, lty=2 ,col="lightblue", lwd=3)
 # lines(aca_p15$dates, aca_p15$V2, lty=2 ,col="gray", lwd=3)
 # lines(aca_p5$dates, aca_p5$V2, lty=2 ,col="gold3", lwd=3)
 # lines(aca_min$dates, aca_min$V2, lty=2 ,col="darkred", lwd=3)
+
+abline(200,0,lty=3)
+
+abline(120,0,lty=3)
+abline(85,0,lty=3)
+abline(65,0,lty=3)
+abline(43,0,lty=3)
+abline(14,0,lty=3)
+
 #Emergència III
 ini_date <- as.Date(V_sau$date)[1]
 end_date <- as.Date(V_sau$date)[dim(V_sau)[1]]
