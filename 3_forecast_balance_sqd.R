@@ -9,7 +9,7 @@ dir <- "/home/rmarce/volume_ter/"
 setwd(dir)
 
 year_initial <- 2024
-month_initial <- "10"
+month_initial <- "04"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season
@@ -51,6 +51,7 @@ if (out_option==2){
   outflow <- pseas$Qout[1:nrow(inflow_for_sqd)]
 }
 
+#new OPTION FOR OUTFLOwS
 if (out_option==3){
   outflows_monthly_CD <- read.csv("in/Cabals_outflow_mensuals.csv",stringsAsFactors = FALSE)
   outflows_monthly_CD$date_M_D_Y <- mdy(outflows_monthly_CD$date_M_D_Y)

@@ -9,7 +9,7 @@ dir <- "/home/rmarce/volume_ter/"
 setwd(dir)
 
 year_initial <- 2024
-month_initial <- "10"
+month_initial <- "04"
 members <- 51
 fix_plot <- FALSE #to set as default plots and csv outputs
 plot_actual <- TRUE #plot current season

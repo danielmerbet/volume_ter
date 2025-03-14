@@ -5,7 +5,7 @@ setwd(dir)
 
 #####MANDATORY FIELDS TO CHANGE###############
 year_initial <- 2024
-month_initial <- "10" #"01":january, "03":march, "11":november etc...
+month_initial <- "04" #"01":january, "03":march, "11":november etc...
 #outflow option: 1 or 2 or 3
 # 1 is the median value of the last x days
 # 2 the same as previous season (IT COULD HAVE ERRORS if it was too different than current season)
@@ -71,7 +71,7 @@ if (out_option==1){
 writeLines(file_read, con=code4)
 system(paste0("Rscript ", dir,code4))
 
-#Modify and run 3_forecast_balance_sqd.R
+#Modify and run 3_forecast_balance_ter.R
 code5 <- "3_forecast_balance_ter.R"
 file_read <- readLines(code5)
 file_read[8]  <- paste0("dir <- \"", dir, "\"")
@@ -81,3 +81,4 @@ file_read[14] <- paste0("fix_plot <- ", fix_plot, " #to set as default plots and
 file_read[15] <- paste0("plot_actual <- ", plot_actual," #plot current season")
 writeLines(file_read, con=code5)
 system(paste0("Rscript ", dir,code5))
+

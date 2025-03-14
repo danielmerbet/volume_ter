@@ -12,7 +12,8 @@ data$date <- as.Date(data$date, format = "%m/%d/%Y")
 #checking data
 summary(data)
 
-#Rafa: I changed this part so the calculation is closer to waht they do historically
+#Rafa: I changed this part so the calculation is closer to what they do historically
+# It is just a matter of how you consider volumes and date of inflow/outflow
 #calculate Qin from V (hm3/d) and Qout (m3/s): Qin[i] = (V[i] -V[i-1]) + Qout[i]; i=time
 diffV_calc <- (data$V[2:nrow(data)] - data$V[1:(nrow(data)-1)])*(1e6/86400)
 Qin_calc <-  diffV_calc + data$Qout[2:(nrow(data))]
@@ -20,6 +21,7 @@ data$Qin_calc <- c(NA,Qin_calc)
 
 #Indentify negative Qin, this values will be set as 0, and this could affect the heat budget
 #RAFA: I changed the criterion, we will set negative values as linear interpolation between good values
+# and then we will change the rest of the budget accordingly
 data$neg_Qin <- NA
 data$neg_Qin[data$Qin_calc<0] <- "negative"
 #data$Qin_calc[data$Qin_calc<0] <- 0
@@ -43,7 +45,7 @@ data$Qin_calc <- data$Qin_calc_interp
 
 #remove first row
 data <- data[2:nrow(data),]
-#data <- data[1:(nrow(data)-1),] #Rafa: I do not think we need this line now
+#data <- data[1:(nrow(data)-1),] #Rafa: I do not think we need this line now with the new calculation
 
 
 write.csv(data, file="out/calculated_sau.csv",
